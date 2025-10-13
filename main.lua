@@ -30,55 +30,20 @@ local Window = WindUI:CreateWindow({
     HideSearchBar = false,
     
     OpenButton = {
-    Title = "Abrir XRNL HUB", -- cambia el texto si quieres
-    Icon = "rbxassetid://12187365364", -- ✅ imagen personalizada de Roblox
-    CornerRadius = UDim.new(1, 0), -- forma redonda
-    StrokeThickness = 3, -- borde visible
-    Enabled = true, -- habilitado
-    Draggable = true, -- se puede mover
-    OnlyMobile = false, -- visible en PC y móvil
-    
-    Color = ColorSequence.new({ -- efecto degradado
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 15, 123)), 
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(248, 155, 41))
-    }),
-}
--- 🔸 Crea icono flotante personalizado (universal)
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+        Title = "Open .ftgs hub UI", -- can be changed
+        CornerRadius = UDim.new(1,0), -- fully rounded
+        StrokeThickness = 3, -- removing outline
+        Enabled = true, -- enable or disable openbutton
+        Draggable = true,
+        OnlyMobile = false,
+        
+        Color = ColorSequence.new( -- gradient
+            Color3.fromHex("#30FF6A"), 
+            Color3.fromHex("#e7ff2f")
+        )
+    }
+})
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "XRNL_Icon"
-gui.ResetOnSpawn = false
-gui.Parent = playerGui
-
-local icon = Instance.new("ImageButton")
-icon.Image = "rbxassetid://12187365364" -- tu imagen personalizada
-icon.Size = UDim2.new(0, 60, 0, 60)
-icon.Position = UDim2.new(0, 30, 0, 200)
-icon.BackgroundTransparency = 1
-icon.Draggable = true
-icon.Parent = gui
-
--- 🔹 efecto de borde
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 128, 0)
-stroke.Thickness = 2
-stroke.Parent = icon
-
--- 🔹 esquinas redondeadas
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1, 0)
-corner.Parent = icon
-
--- 🔹 abrir/cerrar el panel WindUI
-icon.MouseButton1Click:Connect(function()
-    pcall(function()
-        if Window.Toggle then Window:Toggle() end
-    end)
-end)
---------------------------------------------------------------------------------------------------------------
 
 -- */ Other Functions /* --
 local function parseJSON(luau_table, indent, level, visited)
