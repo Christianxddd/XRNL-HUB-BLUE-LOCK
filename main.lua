@@ -43,7 +43,42 @@ local Window = WindUI:CreateWindow({
         ColorSequenceKeypoint.new(1, Color3.fromRGB(248, 155, 41))
     }),
 }
+-- 🔸 Crea icono flotante personalizado (universal)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+local gui = Instance.new("ScreenGui")
+gui.Name = "XRNL_Icon"
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
+
+local icon = Instance.new("ImageButton")
+icon.Image = "rbxassetid://12187365364" -- tu imagen personalizada
+icon.Size = UDim2.new(0, 60, 0, 60)
+icon.Position = UDim2.new(0, 30, 0, 200)
+icon.BackgroundTransparency = 1
+icon.Draggable = true
+icon.Parent = gui
+
+-- 🔹 efecto de borde
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 128, 0)
+stroke.Thickness = 2
+stroke.Parent = icon
+
+-- 🔹 esquinas redondeadas
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0)
+corner.Parent = icon
+
+-- 🔹 abrir/cerrar el panel WindUI
+icon.MouseButton1Click:Connect(function()
+    pcall(function()
+        if Window.Toggle then Window:Toggle() end
+    end)
+end)
+--------------------------------------------------------------------------------------------------------------
 
 -- */ Other Functions /* --
 local function parseJSON(luau_table, indent, level, visited)
