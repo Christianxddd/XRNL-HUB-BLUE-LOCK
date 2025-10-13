@@ -44,6 +44,8 @@ local Window = WindUI:CreateWindow({
     }
 })
 
+Window:SetBackgroundImage("rbxassetid://12187365364")
+
 
 -- */ Other Functions /* --
 local function parseJSON(luau_table, indent, level, visited)
