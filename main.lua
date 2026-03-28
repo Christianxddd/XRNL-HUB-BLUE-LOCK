@@ -384,10 +384,10 @@ ToggleTab:Toggle({
         end
     end
 })
- -- Toggle Fly JOYSTICK (Mobile + PC)
+-- Toggle Fly V3 (PRO)
 ToggleTab:Toggle({
-    Title = "Fly Joystick",
-    Desc = "Compatible con joystick móvil",
+    Title = "Fly V3",
+    Desc = "Fly avanzado tipo V3",
     Default = S.Fly or false,
     Callback = function(state)
         S.Fly = state
@@ -395,55 +395,87 @@ ToggleTab:Toggle({
         local player = game:GetService("Players").LocalPlayer
         local char = player.Character
         if not char then return end
-        
+
         local hum = char:FindFirstChildOfClass("Humanoid")
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if not hum or not hrp then return end
 
+        local UIS = game:GetService("UserInputService")
         local RunService = game:GetService("RunService")
 
         if state then
+            hum.PlatformStand = true
+
             local bv = Instance.new("BodyVelocity")
             bv.Name = "XRNL_FLY"
             bv.MaxForce = Vector3.new(9e9,9e9,9e9)
             bv.Velocity = Vector3.new(0,0,0)
             bv.Parent = hrp
 
-            local speed = 80
+            local bg = Instance.new("BodyGyro")
+            bg.Name = "XRNL_GYRO"
+            bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+            bg.P = 1000
+            bg.CFrame = hrp.CFrame
+            bg.Parent = hrp
 
-            S.FlyConn = RunService.Heartbeat:Connect(function()
-                -- movimiento del joystick / WASD
+            local speed = S.FlySpeed or 70
+
+            S.FlyConn = RunService.RenderStepped:Connect(function()
+                local cam = workspace.CurrentCamera
                 local moveDir = hum.MoveDirection
 
-                -- dirección de cámara
-                local cam = workspace.CurrentCamera
-                local camCF = cam.CFrame
+                local move = (cam.CFrame.LookVector * moveDir.Z) 
+                           + (cam.CFrame.RightVector * moveDir.X)
 
-                local move = (camCF.RightVector * moveDir.X) + (camCF.LookVector * moveDir.Z)
-
-                -- subir con salto (funciona en móvil)
-                if hum.Jump then
+                -- subir/bajar
+                if UIS:IsKeyDown(Enum.KeyCode.Space) or hum.Jump then
                     move = move + Vector3.new(0,1,0)
                 end
 
-                bv.Velocity = move * speed
+                if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    move = move + Vector3.new(0,-1,0)
+                end
+
+                if move.Magnitude > 0 then
+                    bv.Velocity = move.Unit * speed
+                else
+                    bv.Velocity = Vector3.new(0,0,0)
+                end
+
+                bg.CFrame = cam.CFrame
             end)
 
         else
+            -- apagar fly
             if S.FlyConn then
                 S.FlyConn:Disconnect()
                 S.FlyConn = nil
             end
 
+            if hum then
+                hum.PlatformStand = false
+            end
+
             for _, v in pairs(hrp:GetChildren()) do
-                if v.Name == "XRNL_FLY" then
+                if v.Name == "XRNL_FLY" or v.Name == "XRNL_GYRO" then
                     v:Destroy()
                 end
             end
         end
     end
 })
+-- Slider para ajustar velocidad del Fly en tiempo real
+S.FlySpeed = S.FlySpeed or 70
 
+ToggleTab:Slider({
+    Title = "Fly Speed",
+    Step = 1,
+    Value = { Min = 20, Max = 300, Default = S.FlySpeed },
+    Callback = function(v)
+        S.FlySpeed = v
+    end
+})
 ---------------------------------------------------------------------------------------------------------
     
     -- Estado global (persistente)
