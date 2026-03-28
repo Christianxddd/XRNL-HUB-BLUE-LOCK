@@ -328,29 +328,66 @@ ToggleTab:Slider({
     end
 })
 
-    -- Toggle para activar/desactivar Invisible
+-- Toggle Invisible PRO
 ToggleTab:Toggle({
-    Title = "Invisible",
-    Desc = "Toggle Invisible",
+    Title = "Invisible PRO",
+    Desc = "Invisible mejorado",
     Default = S.Invisible or false,
     Callback = function(state)
         S.Invisible = state
-        
+
         local player = game:GetService("Players").LocalPlayer
-        if player.Character then
-            for _, v in pairs(player.Character:GetDescendants()) do
-                if v:IsA("BasePart") or v:IsA("Decal") then
-                    v.Transparency = state and 1 or 0
+
+        if state then
+            local char = player.Character
+            if not char then return end
+
+            local clone = char:Clone()
+            clone.Name = "FakeCharacter"
+            clone.Parent = workspace
+
+            -- quitar físicas del clon
+            for _, v in pairs(clone:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.Anchored = true
+                    v.CanCollide = false
                 end
+            end
+
+            -- ocultar el real
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") or v:IsA("Decal") then
+                    v.Transparency = 1
+                end
+            end
+
+            S.FakeChar = clone
+
+        else
+            local player = game:GetService("Players").LocalPlayer
+            local char = player.Character
+
+            -- volver visible
+            if char then
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("BasePart") or v:IsA("Decal") then
+                        v.Transparency = 0
+                    end
+                end
+            end
+
+            -- borrar clon
+            if S.FakeChar then
+                S.FakeChar:Destroy()
+                S.FakeChar = nil
             end
         end
     end
 })
-
-    -- Toggle para activar/desactivar Fly
+ -- Toggle Fly JOYSTICK (Mobile + PC)
 ToggleTab:Toggle({
-    Title = "Fly",
-    Desc = "Volar libre",
+    Title = "Fly Joystick",
+    Desc = "Compatible con joystick móvil",
     Default = S.Fly or false,
     Callback = function(state)
         S.Fly = state
@@ -359,8 +396,11 @@ ToggleTab:Toggle({
         local char = player.Character
         if not char then return end
         
+        local hum = char:FindFirstChildOfClass("Humanoid")
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
+        if not hum or not hrp then return end
+
+        local RunService = game:GetService("RunService")
 
         if state then
             local bv = Instance.new("BodyVelocity")
@@ -369,10 +409,26 @@ ToggleTab:Toggle({
             bv.Velocity = Vector3.new(0,0,0)
             bv.Parent = hrp
 
-            S.FlyConn = game:GetService("RunService").Heartbeat:Connect(function()
+            local speed = 80
+
+            S.FlyConn = RunService.Heartbeat:Connect(function()
+                -- movimiento del joystick / WASD
+                local moveDir = hum.MoveDirection
+
+                -- dirección de cámara
                 local cam = workspace.CurrentCamera
-                bv.Velocity = cam.CFrame.LookVector * 60
+                local camCF = cam.CFrame
+
+                local move = (camCF.RightVector * moveDir.X) + (camCF.LookVector * moveDir.Z)
+
+                -- subir con salto (funciona en móvil)
+                if hum.Jump then
+                    move = move + Vector3.new(0,1,0)
+                end
+
+                bv.Velocity = move * speed
             end)
+
         else
             if S.FlyConn then
                 S.FlyConn:Disconnect()
