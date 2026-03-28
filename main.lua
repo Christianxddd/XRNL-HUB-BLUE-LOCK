@@ -22,7 +22,7 @@ end
 
 -- */  Window  /* --
 local Window = WindUI:CreateWindow({
-    Title = ".ftgs hub  |  WindUI Example",
+    Title = ".XRNL  |  ARCH",
     Author = "by .ftgs • Footagesus",
     Folder = "ftgshub",
     NewElements = true,
@@ -324,6 +324,66 @@ ToggleTab:Slider({
         S.Speed = v
         if S.SpeedEnabled then
             applySpeed()
+        end
+    end
+})
+
+    -- Toggle para activar/desactivar Invisible
+ToggleTab:Toggle({
+    Title = "Invisible",
+    Desc = "Toggle Invisible",
+    Default = S.Invisible or false,
+    Callback = function(state)
+        S.Invisible = state
+        
+        local player = game:GetService("Players").LocalPlayer
+        if player.Character then
+            for _, v in pairs(player.Character:GetDescendants()) do
+                if v:IsA("BasePart") or v:IsA("Decal") then
+                    v.Transparency = state and 1 or 0
+                end
+            end
+        end
+    end
+})
+
+    -- Toggle para activar/desactivar Fly
+ToggleTab:Toggle({
+    Title = "Fly",
+    Desc = "Volar libre",
+    Default = S.Fly or false,
+    Callback = function(state)
+        S.Fly = state
+
+        local player = game:GetService("Players").LocalPlayer
+        local char = player.Character
+        if not char then return end
+        
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        if state then
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "XRNL_FLY"
+            bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+            bv.Velocity = Vector3.new(0,0,0)
+            bv.Parent = hrp
+
+            S.FlyConn = game:GetService("RunService").Heartbeat:Connect(function()
+                local cam = workspace.CurrentCamera
+                bv.Velocity = cam.CFrame.LookVector * 60
+            end)
+        else
+            if S.FlyConn then
+                S.FlyConn:Disconnect()
+                S.FlyConn = nil
+            end
+
+            for _, v in pairs(hrp:GetChildren()) do
+                if v.Name == "XRNL_FLY" then
+                    v:Destroy()
+                end
+            end
         end
     end
 })
